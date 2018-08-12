@@ -1,0 +1,26 @@
+{
+    "type" : "object",
+    "direction": "fromThing",
+    "sharing"  : "public",
+    "priority" : "low",
+    "description" : "temperature readings from device",
+    "tags" : [
+      "temperature", "observation"
+    ],
+    "required" : ["msgType", "samplingTime","temperature"],
+    "properties" : {
+      "msgType" : {
+	"type" : "string",
+	"description" : "use the same name as this schema"
+      },
+      "samplingTime" : {
+	"type" : "number",
+	"format" : "date-time"      
+      },
+      "temperature" : {
+	"type" : "number",
+	"units" : "centigrade"
+      }
+    },
+    "additionalProperties" : false
+}

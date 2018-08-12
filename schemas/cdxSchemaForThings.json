@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id" : "http://localhost/",
+  "description": "Schema for CDX things",
+  "version": "1.1.0",
+  "type": "object",
+  "definitions" : {
+    "sharingType" : {"enum" : ["public", "private", "protected"]},
+    "priorityType" :{"enum" :["low","medium","high"]},
+    "directionType":{"enum" :["fromThing", "toThing"]},
+    "valueSchema": {
+      "type": "object",
+      "required": ["value","description"],
+      "properties": {
+        "value": {
+          "type": ["null", "boolean", "number", "string", "object"]
+        },
+        "description": {
+          "type": "string",
+          "describes": "some more info on this parameter"
+        },
+        "ontologyRef": {
+          "type": "string",
+          "format": "uri",
+	  "description" : "Optional: link to ontology which semantically defines this parameter"
+        },
+      },
+    },
+    "accessMechanismSchema": {
+      "type": "object",
+      "required": ["accessEndPoint","subscriptionEndPoint"],
+      "properties": {
+        "requestAccessSite": {
+          "type": "string",
+          "format": "uri",
+          "describes": "URI to get permissions (e.g. tokens) to access to the thing's messages"
+        },
+        "accessEndPoint": {
+          "type": "string",
+          "format": "uri",
+          "describes": "URI to access the archive of thing's messages"
+        },
+        "additionalResourceInfo": {
+          "type": "string",
+          "format": "uri",
+          "describes": "Link to get additional information for this resource"
+        },
+        "subscriptionEndPoint": {
+          "type": "string",
+          "format": "uri",
+          "describes": "URI to subscribe to the thing's messages"
+        },
+	"publishEndPoint": {
+          "type": "string",
+          "format": "uri",
+          "describes": "URI where the thing publishes its messages"
+        }
+      },
+    },
+    "ownerSchema": {
+      "type": "object",
+      "required": ["ownerName"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "describes": "Owner's Name"
+        },
+	"ownerId" : {
+	  "type" : "string",
+	  "describes":"userid of owner"
+	},
+        "website": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+    },
+    "geoLocationSchema": {
+      "type": "object",
+      "required" : ["address"],
+      "properties": {
+        "address": {
+          "type": "string",
+          "describes": "Street address of the resource"
+        },
+        "spaceId": {
+          "type": "string",
+          "describes": "ID of the Space region it belongs to"
+        },
+	"latitude"  : {"type" : "number"},
+	"longitude" : {"type" : "number"},
+	"altitude"  : {"type" : "number"},
+      },
+      "coordinateReferenceSystem": {
+          "type": "string",
+          "format": "uri",
+	  "describes" : "Link to definition of the coordinate system"
+        }	      
+    },
+    "messageSchema" : {
+      "description" : "define the schema for messages to/from things",
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type" : "object",
+      "definitions" : {
+	"sharingType" : {"enum" : ["public", "private", "protected"]},
+      },
+      "required" : ["type", "direction", "sharing", "priority", "description", "required", "properties", "$schema"],
+      "properties" : {
+	"type" : {"enum":["object"]},
+	"description" :{"type":"string"},
+	"direction" : {"enum" : ["fromThing", "toThing"]},
+	"sharing" :{"$ref":"#/definitions/sharingType"},
+	"priority" : {"enum":["low", "medium", "high"]},
+	"tags" : { "type" : "array"},
+	"$schema" : {
+	  "type" : "string",
+	  "format" : "uri-reference"
+	},
+	"required" : {
+	  "type" : "array",
+	  "minItems" : 1,
+	  "uniqueItems":true,
+	  "items" : [{"const" : "msgType"}],
+	  "additionalItems" : {"type" :"string"}
+	},
+	"properties" : {"type" : "object"}		     
+      }
+    },
+    "otherInfoSchema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "description" : "otherInfoSchema: for all other things not covered above",
+      "definitions" : {
+	"sharingType" : {"enum" : ["public", "private", "protected"]},
+      },
+      "required" : ["infoDescription","sharing"],
+      "properties" :{
+	"infoDescription" : {"type" : "string"},
+	"sharing" : {"$ref" : "#/definitions/sharingType"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "required" : ["id", "owner", "refCatalogueSchema"],
+  "properties":{
+    "id": {
+      "type": "string",
+      "describes": "unique identifier of the data resource within this domain"
+    },
+    "refCatalogueSchema": {
+      "type": "string",
+      "format": "uri",
+      "describes": "Reference to the catalogue schema to which this entry adheres"
+    },
+    "UI": {
+      "type": "string",
+      "describes": "Globally unique identifier for the resource. E.g IMEI numbers, UUID, MacID etc."
+    },
+    "owner": {"$ref": "#/definitions/ownerSchema"},
+    "accessMechanism": {"$ref": "#/definitions/accessMechanismSchema"},
+    "location": {"$ref": "#/definitions/geoLocationSchema"},
+    "tags": {
+      "type": "array",
+      "minItems": 0,
+      "describes": "any strings which annotates this resource",
+      "items": {"type": "string"}
+    }
+  },
+  "patternProperties": {
+    "^(?!(id$|owner$|location$|accessMechanism$|tags$|UI$|refCatalogueSchema$))[a-zA-Z0-9]+$": {
+      "oneOf" : [
+	{"$ref": "#/definitions/otherInfoSchema"},
+	{"$ref": "#/definitions/messageSchema"}
+      ]
+    }
+  },
+  "additionalProperties": false
+}
